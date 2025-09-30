@@ -1,0 +1,48 @@
+/* style.css */
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  margin: 20px 0;
+}
+
+#board {
+  display: grid;
+  grid-template-columns: repeat(30, 30px);
+  grid-template-rows: repeat(30, 30px);
+  gap: 1px;
+  justify-content: center;
+  margin: 20px auto;
+  max-width: 100%;
+  overflow: auto;
+  user-select: none;
+}
+
+.cell {
+  width: 30px;
+  height: 30px;
+  background-color: #fff;
+  border: 1px solid #999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  cursor: pointer;
+  user-select: none;
+}
+
+#status {
+  font-size: 1.2em;
+  margin-top: 10px;
+}
+
+button {
+  margin: 10px;
+  padding: 8px 16px;
+  font-size: 1em;
+  cursor: pointer;
+}

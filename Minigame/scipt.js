@@ -1,0 +1,143 @@
+// script.js
+const boardSize = 30; // Kích thước bàn cờ
+let board = [];
+let currentPlayer = 'X';
+let gameOver = false;
+const boardDiv = document.getElementById('board');
+const statusDiv = document.getElementById('status');
+
+function createBoard() {
+  board = Array(boardSize).fill(null).map(() => Array(boardSize).fill(''));
+  boardDiv.innerHTML = '';
+
+  for (let row = 0; row < boardSize; row++) {
+    for (let col = 0; col < boardSize; col++) {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.dataset.row = row;
+      cell.dataset.col = col;
+      cell.addEventListener('click', handleClick);
+      boardDiv.appendChild(cell);
+    }
+  }
+}
+
+function handleClick(e) {
+  if (gameOver) return;
+
+  const row = parseInt(e.target.dataset.row);
+  const col = parseInt(e.target.dataset.col);
+
+  if (board[row][col] !== '') return;
+
+  board[row][col] = currentPlayer;
+  e.target.textContent = currentPlayer;
+
+  if (checkWin(row, col)) {
+    statusDiv.textContent = `Người thắng: ${currentPlayer}!`;
+    gameOver = true;
+    highlightWinCells(row, col);
+    return;
+  }
+
+  currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+  statusDiv.textContent = `Lượt chơi: ${currentPlayer}`;
+}
+
+function checkWin(row, col) {
+  // Kiểm tra 4 hướng: ngang, dọc, chéo chính, chéo phụ
+  return (
+    countInDirection(row, col, 0, 1) + countInDirection(row, col, 0, -1) + 1 >= 5 || // ngang
+    countInDirection(row, col, 1, 0) + countInDirection(row, col, -1, 0) + 1 >= 5 || // dọc
+    countInDirection(row, col, 1, 1) + countInDirection(row, col, -1, -1) + 1 >= 5 || // chéo chính
+    countInDirection(row, col, 1, -1) + countInDirection(row, col, -1, 1) + 1 >= 5    // chéo phụ
+  );
+}
+
+// Đếm số ô liên tiếp theo hướng (dRow, dCol) cùng ký tự currentPlayer
+function countInDirection(row, col, dRow, dCol) {
+  let count = 0;
+  let r = row + dRow;
+  let c = col + dCol;
+
+  while (
+    r >= 0 &&
+    r < boardSize &&
+    c >= 0 &&
+    c < boardSize &&
+    board[r][c] === currentPlayer
+  ) {
+    count++;
+    r += dRow;
+    c += dCol;
+  }
+
+  return count;
+}
+
+function resetBoard() {
+  currentPlayer = 'X';
+  gameOver = false;
+  statusDiv.textContent = `Lượt chơi: ${currentPlayer}`;
+  createBoard();
+}
+
+function highlightWinCells(row, col) {
+  // Highlight 5 ô thắng (theo hướng thắng)
+  // Tìm hướng thắng:
+  const directions = [
+    [0, 1], [1, 0], [1, 1], [1, -1]
+  ];
+
+  for (const [dRow, dCol] of directions) {
+    let count = 1;
+    let cellsToHighlight = [[row, col]];
+
+    // Đếm ra phía trước
+    let r = row + dRow;
+    let c = col + dCol;
+    while (
+      r >= 0 &&
+      r < boardSize &&
+      c >= 0 &&
+      c < boardSize &&
+      board[r][c] === currentPlayer
+    ) {
+      cellsToHighlight.push([r, c]);
+      count++;
+      r += dRow;
+      c += dCol;
+    }
+
+    // Đếm ra phía sau
+    r = row - dRow;
+    c = col - dCol;
+    while (
+      r >= 0 &&
+      r < boardSize &&
+      c >= 0 &&
+      c < boardSize &&
+      board[r][c] === currentPlayer
+    ) {
+      cellsToHighlight.unshift([r, c]);
+      count++;
+      r -= dRow;
+      c -= dCol;
+    }
+
+    if (count >= 5) {
+      // Chỉ highlight 5 ô liên tiếp đầu tiên
+      cellsToHighlight = cellsToHighlight.slice(0, 5);
+
+      // Đổi màu nền ô thắng
+      for (const [rr, cc] of cellsToHighlight) {
+        const index = rr * boardSize + cc;
+        boardDiv.children[index].style.backgroundColor = '#8fbc8f'; // xanh lá nhạt
+      }
+      break; // chỉ highlight 1 hướng thắng thôi
+    }
+  }
+}
+
+// Khởi tạo lần đầu
+createBoard();
